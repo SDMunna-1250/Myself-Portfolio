@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shankar Dey Munn</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            cyan: '#06b6d4',
+                            purple: '#a855f7',
+                            pink: '#ec4899',
+                            dark: '#030712',
+                            card: '#0f172a',
+                            border: '#1e293b'
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+
+        /* Gradient Text Helper */
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4 0%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(6, 182, 212, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.15);
+        }
+
+        /* Canvas Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen selection:bg-cyan-500 selection:text-white">
+
+    <!-- 3D Canvas Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Navigation Bar -->
+    <header class="fixed top-0 left-0 right-0 z-50 glass-card transition-all duration-300 border-b border-gray-800/50" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo -->
+                <a href="#hero" class="flex items-center space-x-3 text-xl font-extrabold tracking-wider text-white">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-pink-500 flex items-center justify-center font-black text-lg text-white shadow-lg shadow-cyan-500/30">SDM</span>
+                    <span class="hidden sm:inline-block">Shankar <span class="gradient-text">Dey Munna</span></span>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex space-x-8 text-sm font-medium">
+                    <a href="#home" class="hover:text-cyan-400 transition-colors py-1">Home</a>
+                    <a href="#about" class="hover:text-cyan-400 transition-colors py-1">About</a>
+                    <a href="#skills" class="hover:text-cyan-400 transition-colors py-1">Skills</a>
+                    <a href="#projects" class="hover:text-cyan-400 transition-colors py-1">Projects</a>
+                    <a href="#contact" class="hover:text-cyan-400 transition-colors py-1">Contact</a>
+                </nav>
+
+                <!-- Action Button -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="#contact" class="px-5 py-2.5 rounded-full text-sm font-semibold bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-105 active:scale-95 transition-all duration-200">
+                        Get In Touch
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white focus:outline-none p-2" aria-label="Toggle Navigation">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden glass-card border-t border-gray-800/80 px-6 pt-4 pb-6 space-y-4">
+            <a href="#home" class="block text-base font-medium text-gray-300 hover:text-cyan-400">Home</a>
+            <a href="#about" class="block text-base font-medium text-gray-300 hover:text-cyan-400">About</a>
+            <a href="#skills" class="block text-base font-medium text-gray-300 hover:text-cyan-400">Skills</a>
+            <a href="#projects" class="block text-base font-medium text-gray-300 hover:text-cyan-400">Projects</a>
+            <a href="#contact" class="block text-base font-medium text-gray-300 hover:text-cyan-400">Contact</a>
+            <a href="#contact" class="inline-block mt-2 w-full text-center px-5 py-2.5 rounded-full text-sm font-semibold bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-md">
+                Get In Touch
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Layer -->
+    <main class="relative z-10">
+
+        <!-- Hero Section -->
+         <section id="hero" class="min-h-screen flex items-center justify-center pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-4xl mx-auto text-center space-y-8">
+                
+                <!-- Status Badge -->
+                <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full glass-card border border-cyan-500/30 text-xs sm:text-sm font-medium text-cyan-300 animate-pulse-slow">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                    <span>Software Developer & Interactive Web Creator</span>
+                </div>
+
+                <!-- Main Title -->
+                <h1 class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-none text-white">
+                    Hi, I'm <br class="sm:hidden"><span class="gradient-text">Shankar Dey Munna</span>
+                </h1>
+
+                <!-- Typewriter Text -->
+                <div class="text-lg sm:text-2xl md:text-3xl font-semibold text-gray-300 h-10 flex items-center justify-center">
+                    <span id="typewriter"></span>
+                    <span class="ml-1 w-0.5 h-7 bg-cyan-400 inline-block animate-pulse"></span>
+                </div>
+
+                <p class="max-w-2xl mx-auto text-base sm:text-lg text-gray-400 leading-relaxed">
+                    Passionate about WebDesign, Software Develop.
+                </p>
+
+    </div>
+</section>
+
+                <!-- Call to Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                    <a href="#projects" class="w-full sm:w-auto px-8 py-3.5 rounded-full font-semibold text-white bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 hover:scale-105 active:scale-95 transition-all">
+                        View My Work <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                    </a>
+                    <a href="#contact" class="w-full sm:w-auto px-8 py-3.5 rounded-full font-semibold text-gray-300 glass-card hover:bg-gray-800 hover:text-white hover:scale-105 active:scale-95 transition-all">
+                        Contact Me
+                    </a>
+                </div>
+
+                <!-- Social Links -->
+                <div class="flex justify-center space-x-6 pt-6 text-gray-400">
+                    <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-400 text-2xl transition-all transform hover:scale-110" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-400 text-2xl transition-all transform hover:scale-110" title="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="mailto:contact@example.com" class="hover:text-cyan-400 text-2xl transition-all transform hover:scale-110" title="Email"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-800/50">
+            <div class="max-w-6xl mx-auto space-y-16">
+                
+                <!-- Section Header -->
+                <div class="text-center space-y-2">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">About <span class="gradient-text">Me</span></h2>
+                    <p class="text-gray-400 text-sm sm:text-base max-w-lg mx-auto">Nothing</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
+                    
+                    <!-- Bio Glass Card -->
+                    <div class="glass-card p-8 rounded-3xl space-y-6 flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white text-xl shadow-lg">
+                                <i class="fa-solid fa-code"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-white">Who is Shankar Dey Munna?</h3>
+                            <p class="text-gray-300 leading-relaxed text-sm sm:text-base">
+                                "I am a Computer Science student at Premier University. Currently, I am actively building my foundation in core programming languages like C, C++, Python, Java, and JavaScript, alongside modern web technologies including HTML and CSS."
+                            </p>
+                            <!-- <p class="text-gray-400 leading-relaxed text-sm sm:text-base">
+                                Whether building backend logic in Java and C++, designing frontend interfaces using React and Tailwind CSS, or creating 3D WebGL scenes with Three.js, I strive for efficiency and visual quality.
+                            </p> -->
+                        </div>
+
+                        <!-- Key Pillars Grid -->
+                        <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-800">
+                            <div>
+                                <h4 class="text-purple-400 font-semibold text-sm">C & C++</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">Beginner</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold text-sm">Python</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">Beginner</p>
+                            </div>
+                            <div>
+                                <h4 class="text-cyan-400 font-semibold text-sm">HTML</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">Beginner</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold text-sm">CSS</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">Beginner</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold text-sm">JavaScript</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">Beginner</p>
+                            </div>
+                            <div>
+                                <h4 class="text-purple-400 font-semibold text-sm">Java</h4>
+                                <p class="text-xs text-gray-400 mt-0.5">Beginner</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Highlight Features Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        
+                        <div class="glass-card p-6 rounded-2xl space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">Problem Solving</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">Beginner understanding of algorithms, data structures, object-oriented principles in C, C++, and Java.</p>
+                        </div>
+
+                        <div class="glass-card p-6 rounded-2xl space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-cubes"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">3D Graphics</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">Beginner.</p>
+                        </div>
+
+                        <div class="glass-card p-6 rounded-2xl space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">Modern UI/UX</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">Beginner.</p>
+                        </div>
+
+                        <div class="glass-card p-6 rounded-2xl space-y-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-code-branch"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white">Git & GitHub</h4>
+                            <p class="text-xs text-gray-400 leading-relaxed">Beginner.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-800/50">
+            <div class="max-w-6xl mx-auto space-y-12">
+                <div class="text-center space-y-2">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Skills & <span class="gradient-text">Technologies</span></h2>
+                    <p class="text-gray-400 text-sm sm:text-base">I am a Beginner.</p>
+                </div>
+
+                <!-- Skills Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+                    
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-c"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">C / C++</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-java"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">Java & Swing</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-yellow-500/10 text-yellow-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-js"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">JavaScript</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-react"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">React</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-wind"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">Tailwind CSS</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-bootstrap"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">Bootstrap</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-cube"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">Three.js</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-git-alt"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">Git & GitHub</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">HTML5 / CSS3</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                    <!-- Skill Item -->
+                    <div class="glass-card p-5 rounded-2xl text-center space-y-3 group hover:-translate-y-1 transition-all duration-300">
+                        <div class="w-12 h-12 mx-auto rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-terminal"></i>
+                        </div>
+                        <h3 class="font-bold text-white text-sm">Data Structures</h3>
+                        <p class="text-[11px] text-gray-400">Beginner.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-800/50">
+            <div class="max-w-6xl mx-auto space-y-12">
+                
+                <div class="text-center space-y-2">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Featured <span class="gradient-text">Projects</span></h2>
+                    <p class="text-gray-400 text-sm sm:text-base">Copy this link : https://github.com/SDMunna-1250</p>
+                </div>
+
+                <!-- Projects Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Project Card 1 -->
+
+                    <div class="glass-card rounded-2xl overflow-hidden group hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="h-48 bg-gradient-to-tr from-purple-950 to-slate-900 relative overflow-hidden flex items-center justify-center border-b border-gray-800">
+                                <i class="fa-solid fa-cash-register text-6xl text-purple-400/80 group-hover:scale-110 transition-transform duration-300"></i>
+                                <div class="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4">
+                                    <a href="#" class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center hover:scale-110 transition-transform" title="Live Preview"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                    <a href="#" class="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center hover:scale-110 transition-transform" title="GitHub Code"><i class="fa-brands fa-github"></i></a>
+                                </div>
+                            </div>
+                            <div class="p-6 space-y-3">
+                                <h3 class="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">3D Animation</h3>
+                                <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                    Copy this link : https://github.com/SDMunna-1250/Animation.git
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0 space-y-3">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-300 border border-orange-500/20">JavaScript</span>
+                                 <span class="text-[10px] px-2.5 py-1 rounded-md bg-yellow-500/10 text-yellow-300 border border-yellow-500/20">HTML</span>
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20">CSS</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Project Card 2 -->
+                    <div class="glass-card rounded-2xl overflow-hidden group hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="h-48 bg-gradient-to-tr from-purple-950 to-slate-900 relative overflow-hidden flex items-center justify-center border-b border-gray-800">
+                                <i class="fa-solid fa-cash-register text-6xl text-purple-400/80 group-hover:scale-110 transition-transform duration-300"></i>
+                                <div class="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4">
+                                    <a href="#" class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center hover:scale-110 transition-transform" title="Live Preview"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                    <a href="#" class="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center hover:scale-110 transition-transform" title="GitHub Code"><i class="fa-brands fa-github"></i></a>
+                                </div>
+                            </div>
+                            <div class="p-6 space-y-3">
+                                <h3 class="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">Premium-E-commerce-Website</h3>
+                                <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                    Copy this link : https://github.com/SDMunna-1250/Premium-E-commerce-Website.git
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0 space-y-3">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-300 border border-orange-500/20">JavaScript</span>
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-yellow-500/10 text-yellow-300 border border-yellow-500/20">HTML</span>
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20">CSS</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Project Card 3 -->
+                    <div class="glass-card rounded-2xl overflow-hidden group hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="h-48 bg-gradient-to-tr from-purple-950 to-slate-900 relative overflow-hidden flex items-center justify-center border-b border-gray-800">
+                                <i class="fa-solid fa-cash-register text-6xl text-purple-400/80 group-hover:scale-110 transition-transform duration-300"></i>
+                                <div class="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4">
+                                    <a href="#" class="w-10 h-10 rounded-full bg-purple-500 text-white flex items-center justify-center hover:scale-110 transition-transform" title="Live Preview"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                    <a href="#" class="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center hover:scale-110 transition-transform" title="GitHub Code"><i class="fa-brands fa-github"></i></a>
+                                </div>
+                            </div>
+                            <div class="p-6 space-y-3">
+                                <h3 class="text-xl font-bold text-white group-hover:text-purple-400 transition-colors">JAVA Project</h3>
+                                <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                    Copy this link : https://github.com/SDMunna-1250/JAVA-Project.git
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0 space-y-3">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-300 border border-orange-500/20">Java</span>
+                                <!-- <span class="text-[10px] px-2.5 py-1 rounded-md bg-yellow-500/10 text-yellow-300 border border-yellow-500/20">HTML</span>
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20">CSS</span> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Card 4 -->
+                    <div class="glass-card rounded-2xl overflow-hidden group hover:border-pink-500/50 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="h-48 bg-gradient-to-tr from-pink-950 to-slate-900 relative overflow-hidden flex items-center justify-center border-b border-gray-800">
+                                <i class="fa-solid fa-laptop-code text-6xl text-pink-400/80 group-hover:scale-110 transition-transform duration-300"></i>
+                                <div class="absolute inset-0 bg-slate-950/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-4">
+                                    <a href="#" class="w-10 h-10 rounded-full bg-pink-500 text-white flex items-center justify-center hover:scale-110 transition-transform" title="Live Preview"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                    <a href="#" class="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center hover:scale-110 transition-transform" title="GitHub Code"><i class="fa-brands fa-github"></i></a>
+                                </div>
+                            </div>
+                            <div class="p-6 space-y-3">
+                                <h3 class="text-xl font-bold text-white group-hover:text-pink-400 transition-colors">Campus Blood Donation Emergency Connect</h3>
+                                <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                   Copy this link : https://github.com/SDMunna-1250/Campus-Blood-Donation-Emergency-Connect.git
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-6 pt-0 space-y-3">
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">HTML</span>
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-teal-500/10 text-teal-300 border border-teal-500/20">CSS</span>
+                                <span class="text-[10px] px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">JavaScript</span>
+                                 <span class="text-[10px] px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20">JSON (JavaScript Object Notation)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+        <!-- Contact Section -->
+        <section id="contact" class="py-24 px-4 sm:px-6 lg:px-8 border-t border-gray-800/50">
+            <div class="max-w-4xl mx-auto space-y-12">
+                <div class="text-center space-y-2">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Get In <span class="gradient-text">Touch</span></h2>
+                    <p class="text-gray-400 text-sm sm:text-base">Let's discuss projects, collaborations, or job opportunities</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    
+                    <!-- Contact Information Cards -->
+                    <div class="space-y-4 md:col-span-1">
+                        <div class="glass-card p-5 rounded-2xl flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs text-gray-400">Email Me</p>
+                                <p class="text-xs sm:text-sm font-semibold text-white truncate">munnadey473@gmail.com</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-5 rounded-2xl flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">Location</p>
+                                <p class="text-sm font-semibold text-white">Chattogram, Bangladesh</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-5 rounded-2xl flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-code-branch"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400">GitHub</p>
+                                <p class="text-sm font-semibold text-white">https://github.com/SDMunna-1250</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="glass-card p-6 sm:p-8 rounded-2xl md:col-span-2">
+                        <form id="contact-form" class="space-y-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label for="form-name" class="block text-xs font-medium text-gray-400 mb-1.5">Your Name</label>
+                                    <input type="text" id="form-name" required placeholder="John Doe" class="w-full bg-slate-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                                </div>
+                                <div>
+                                    <label for="form-email" class="block text-xs font-medium text-gray-400 mb-1.5">Your Email</label>
+                                    <input type="email" id="form-email" required placeholder="john@example.com" class="w-full bg-slate-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="form-subject" class="block text-xs font-medium text-gray-400 mb-1.5">Subject</label>
+                                <input type="text" id="form-subject" required placeholder="Project Collaboration" class="w-full bg-slate-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors">
+                            </div>
+                            <div>
+                                <label for="form-message" class="block text-xs font-medium text-gray-400 mb-1.5">Message</label>
+                                <textarea id="form-message" rows="4" required placeholder="Hello Shankar, I'd like to discuss..." class="w-full bg-slate-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 hover:scale-[1.01] active:scale-95 transition-all">
+                                Send Message <i class="fa-solid fa-paper-plane ml-2 text-xs"></i>
+                            </button>
+                        </form>
+                        
+                        <!-- Feedback Alert -->
+                        <div id="form-response" class="hidden mt-4 p-3.5 rounded-xl text-center text-sm font-medium"></div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-gray-800/80 py-8 text-center text-xs text-gray-500">
+        <p>© <span id="year"></span> Shankar Dey Munna.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Set dynamic current year in footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Mobile Navigation Toggle Logic
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Typewriter Effect Logic
+        const words = [
+            "Beginner Web Developer", 
+            "Beginner Software Developer", 
+            "Beginner 3D Animation", 
+            "Beginner C, C++, JAVA, JavaScript, HTML, CSS, PYTHON"
+        ];
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typewriterEl = document.getElementById('typewriter');
+
+        function type() {
+            const currentWord = words[wordIndex];
+            
+            if (isDeleting) {
+                typewriterEl.textContent = currentWord.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typewriterEl.textContent = currentWord.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let typeSpeed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && charIndex === currentWord.length) {
+                typeSpeed = 2200;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                wordIndex = (wordIndex + 1) % words.length;
+                typeSpeed = 400;
+            }
+
+            setTimeout(type, typeSpeed);
+        }
+        type();
+
+        // Contact Form Handling
+        const contactForm = document.getElementById('contact-form');
+        const formResponse = document.getElementById('form-response');
+
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            formResponse.className = "mt-4 p-3.5 rounded-xl text-center text-sm font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/30";
+            formResponse.textContent = "Thank you! Your message has been sent successfully to Shankar Dey Munna.";
+            formResponse.classList.remove('hidden');
+            contactForm.reset();
+
+            setTimeout(() => {
+                formResponse.classList.add('hidden');
+            }, 6000);
+        });
+
+        // Three.js Interactive 3D Background Engine
+        window.onload = function() {
+            const canvas = document.getElementById('bg-canvas');
+            const scene = new THREE.Scene();
+            
+            // Camera Configuration
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 28;
+
+            // Renderer Configuration
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // Mouse tracking variables
+            let mouseX = 0;
+            let mouseY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX);
+                mouseY = (event.clientY - windowHalfY);
+            });
+
+            // Particles Swarm
+            const particlesCount = 850;
+            const posArray = new Float32Array(particlesCount * 3);
+
+            for (let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 85;
+            }
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.12,
+                color: 0x06b6d4,
+                transparent: true,
+                opacity: 0.75
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+
+            // Floating 3D Geometric Objects Group
+            const shapesGroup = new THREE.Group();
+
+            // Wireframe Icosahedron
+            const geo1 = new THREE.IcosahedronGeometry(4, 0);
+            const mat1 = new THREE.MeshBasicMaterial({ color: 0xa855f7, wireframe: true, transparent: true, opacity: 0.35 });
+            const mesh1 = new THREE.Mesh(geo1, mat1);
+            mesh1.position.set(-16, 8, -4);
+            shapesGroup.add(mesh1);
+
+            // Wireframe Octahedron
+            const geo2 = new THREE.OctahedronGeometry(3.5, 0);
+            const mat2 = new THREE.MeshBasicMaterial({ color: 0x06b6d4, wireframe: true, transparent: true, opacity: 0.4 });
+            const mesh2 = new THREE.Mesh(geo2, mat2);
+            mesh2.position.set(16, -10, -2);
+            shapesGroup.add(mesh2);
+
+            // Wireframe Torus
+            const geo3 = new THREE.TorusGeometry(3, 0.8, 12, 24);
+            const mat3 = new THREE.MeshBasicMaterial({ color: 0xec4899, wireframe: true, transparent: true, opacity: 0.3 });
+            const mesh3 = new THREE.Mesh(geo3, mat3);
+            mesh3.position.set(12, 12, -6);
+            shapesGroup.add(mesh3);
+
+            // Wireframe Myself
+            const geo4 = new THREE.TorusGeometry(3, 0.8, 12, 24);
+            const mat4 = new THREE.MeshBasicMaterial({ color: 0xec4899, wireframe: true, transparent: true, opacity: 0.3 });
+            const mesh4 = new THREE.Mesh(geo4, mat4);
+            mesh3.position.set(12, 12, -6);
+            shapesGroup.add(mesh4);
+
+            scene.add(shapesGroup);
+
+            // Handle Screen Resizing
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // Smooth Scroll Reaction
+            let scrollY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                scrollY = window.scrollY;
+            });
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                const elapsedTime = clock.getElapsedTime();
+
+                // Rotate floating mesh objects
+                mesh1.rotation.x = elapsedTime * 0.2;
+                mesh1.rotation.y = elapsedTime * 0.25;
+
+                mesh2.rotation.x = -elapsedTime * 0.2;
+                mesh2.rotation.y = elapsedTime * 0.3;
+
+                mesh3.rotation.x = elapsedTime * 0.15;
+                mesh3.rotation.y = -elapsedTime * 0.2;
+
+                
+                mesh4.rotation.x = elapsedTime * 0.15;
+                mesh4.rotation.y = -elapsedTime * 0.2;
+
+
+                // Particle drift and rotation
+                particlesMesh.rotation.y = elapsedTime * 0.02;
+
+                // Interactive mouse & scroll camera offset
+                const targetX = mouseX * 0.0008;
+                const targetY = mouseY * 0.0008 + (scrollY * 0.005);
+
+                shapesGroup.rotation.y += 0.05 * (targetX - shapesGroup.rotation.y);
+                shapesGroup.rotation.x += 0.05 * (targetY - shapesGroup.rotation.x);
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        };
+    </script>
+</body>
+</html>
